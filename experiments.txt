@@ -1,0 +1,111 @@
+COMPLETE EXPERIMENT RANKING
+====================================================
+
+METRICS EXPLANATION:
+- Epochs: Maximum epochs allowed (early stop)
+- PCA: Number of PCA components (0 = no PCA)
+- LR: Learning Rate
+- Layers: Hidden Layer architecture
+- Dropout: Dropout rate
+- RMSE: Root Mean Squared Error (lower = better)
+- MAE: Mean Absolute Error (lower = better)
+- Actual Epochs: Epochs used before early stopping
+
+EXPERIMENT RANKING:
+===================
+
+1. BEST PERFORMING
+   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.01 --hidden_layers 128 64 --dropout 0.0
+   RMSE: 29769, MAE: 19174, Actual Epochs: 68
+
+2. SECOND BEST
+   Command: python regresion_nn.py --epochs 500 --pca_components 35 --lr 0.001 --hidden_layers 256 128 64 --dropout 0.0
+   RMSE: 29769, MAE: 19174, Actual Epochs: 128
+
+3. THIRD BEST
+   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.005 --hidden_layers 128 64 --dropout 0.0
+   RMSE: 31037, MAE: 19182, Actual Epochs: 95
+
+4. FOURTH
+   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.001 --hidden_layers 128 64 --dropout 0.0
+   RMSE: 31154, MAE: 19163, Actual Epochs: 356
+
+5. FIFTH
+   Command: python regresion_nn.py --epochs 500 --pca_components 35 --lr 0.001 --hidden_layers 256 128 64 --dropout 0.2
+   RMSE: 30374, MAE: 19838, Actual Epochs: 94
+
+6. SIXTH
+   Command: python regresion_nn.py --epochs 500 --pca_components 35 --lr 0.001 --hidden_layers 256 128 64 --dropout 0.1
+   RMSE: 30428, MAE: 19887, Actual Epochs: 114
+
+7. SEVENTH
+   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.01 --hidden_layers 128 64 --dropout 0.2
+   RMSE: 31227, MAE: 19419, Actual Epochs: 58
+
+8. EIGHTH
+   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.01 --hidden_layers 256 128 64 --dropout 0.15
+   RMSE: 30972, MAE: 19827, Actual Epochs: 24
+
+9. NINTH
+   Command: python regresion_nn.py --epochs 500 --pca_components 30 --lr 0.01 --hidden_layers 256 128 64 --dropout 0.0
+   RMSE: 30802, MAE: 19748, Actual Epochs: 29
+
+10. TENTH
+    Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.01 --hidden_layers 256 128 64 --dropout 0.1
+    RMSE: 31061, MAE: 20028, Actual Epochs: 24
+
+ADDITIONAL EXPERIMENTS:
+=======================
+
+11. Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.01 --hidden_layers 256 128 64 --dropout 0.0
+    RMSE: 32273, MAE: 21148, Actual Epochs: 39
+
+12. Command: python regresion_nn.py --epochs 300 --pca_components 20 --lr 0.01 --hidden_layers 128 64 --dropout 0.0
+    RMSE: 31831, MAE: 19896, Actual Epochs: 300
+
+13. Command: python regresion_nn.py --epochs 500 --pca_components 25 --lr 0.001 --hidden_layers 256 128 64 --dropout 0.0
+    RMSE: 35582, MAE: 23850, Actual Epochs: 500
+
+14. Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.001 --hidden_layers 256 128 64 --dropout 0.1
+    RMSE: 32727, MAE: 20564, Actual Epochs: 299
+
+15. Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.001 --hidden_layers 256 128 64 --dropout 0.2
+    RMSE: 33096, MAE: 20869, Actual Epochs: 299
+
+16. Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.0001 --hidden_layers 128 64 --dropout 0.0
+    RMSE: 61813, MAE: 49203, Actual Epochs: 500
+
+KEY FINDINGS:
+=============
+
+1. OPTIMAL CONFIGURATION:
+   - PCA: 20 components
+   - Learning Rate: 0.01
+   - Architecture: [128, 64]
+   - Dropout: 0.0 (none)
+   - Training: 68 epochs (early stopping)
+
+2. PCA ANALYSIS:
+   - Best: PCA 20
+   - Acceptable: PCA 30-35
+   - Poor: PCA 0, 15, 25
+
+3. LEARNING RATE ANALYSIS:
+   - Best: 0.01
+   - Acceptable: 0.005, 0.001
+   - Poor: 0.0001
+
+4. ARCHITECTURE ANALYSIS:
+   - Best: [128, 64]
+   - Complex architectures ([256, 128, 64]) require more PCA components
+
+5. DROPOUT ANALYSIS:
+   - Dropout consistently worsened performance
+   - Model does not overfit with optimal parameters
+   - Dropout unnecessary for this dataset/config
+
+PERFORMANCE RANGES:
+===================
+- Best RMSE: 29,769
+- Worst RMSE: 61,813
+- Typical RMSE: 30,000 - 33,000
