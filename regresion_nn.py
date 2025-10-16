@@ -148,6 +148,10 @@ def transform_dataframe(df: pd.DataFrame, preprocessors: dict) -> np.ndarray:
 # ---------------------------
 
 class RegressionNet(nn.Module):
+    """
+    Fully connected neural network for regression.
+    Takes input features and outputs a continuous value through hidden layers.
+    """
     def __init__(self, input_dim: int, hidden_layers: List[int], dropout: float = 0.0):
         super().__init__()
         layers = []
@@ -165,7 +169,7 @@ class RegressionNet(nn.Module):
         return self.net(x)
 
 # ---------------------------
-# Training & Evaluation
+# Training
 # ---------------------------
 
 def train_model(
@@ -179,44 +183,67 @@ def train_model(
     patience: int = 10,
     print_every: int = 1
 ):
+    """
+    Train the neural network model with early stopping.
+    
+    Args:
+        model: Neural network model to train
+        device: Device to train on (CPU/GPU)
+        train_loader: DataLoader for training data
+        val_loader: DataLoader for validation data  
+        epochs: Maximum number of training epochs
+        lr: Learning rate for optimizer
+        weight_decay: L2 regularization strength
+        patience: Early stopping patience (epochs without improvement)
+        print_every: Print metrics every N epochs
+        
+    Returns:
+        model: Trained model with best weights restored
+        train_losses: List of training losses per epoch
+        val_losses: List of validation losses per epoch
+    """
+
     criterion = nn.MSELoss()
+    # NOTE: Alternative - HuberLoss is more robust to outliers but MSE was specified in requirements
+    # criterion = nn.HuberLoss(delta=1.0)
+
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     model.to(device)
 
     best_val_loss = float("inf")
     best_state = None
-    epochs_no_improve = 0
+    epochs_no_improve = 0 # early stopping counter
 
     train_losses = []
     val_losses = []
 
     for epoch in range(1, epochs + 1):
-        model.train()
+        model.train()                                   # training mode
         running_loss = 0.0
         n = 0
         for Xb, yb in train_loader:
             Xb = Xb.to(device)
             yb = yb.to(device)
             optimizer.zero_grad()
-            preds = model(Xb)
-            loss = criterion(preds, yb)
-            loss.backward()
-            optimizer.step()
+            preds = model(Xb)                           # forward pass
+            loss = criterion(preds, yb)                 # calculate loss
+            loss.backward()                             # backward pass
+            optimizer.step()                            # update weigths
             running_loss += loss.item() * Xb.size(0)
             n += Xb.size(0)
-        train_epoch_loss = running_loss / n
+        train_epoch_loss = running_loss / n             # average loss for an epoch
         train_losses.append(train_epoch_loss)
 
         # Validation
-        model.eval()
+        model.eval()                                    # evaluation mode
         running_val = 0.0
         nval = 0
         with torch.no_grad():
             for Xv, yv in val_loader:
                 Xv = Xv.to(device)
                 yv = yv.to(device)
-                preds_v = model(Xv)
-                loss_v = criterion(preds_v, yv)
+                preds_v = model(Xv)                     # only forward
+                loss_v = criterion(preds_v, yv)         # calculate loss for validation set
                 running_val += loss_v.item() * Xv.size(0)
                 nval += Xv.size(0)
         val_epoch_loss = running_val / nval
@@ -228,19 +255,24 @@ def train_model(
         # early stopping
         if val_epoch_loss < best_val_loss - 1e-6:
             best_val_loss = val_epoch_loss
-            best_state = model.state_dict()
+            best_state = model.state_dict()             # save best weights
             epochs_no_improve = 0
         else:
             epochs_no_improve += 1
-            if epochs_no_improve >= patience:
+            if epochs_no_improve >= patience:           # stop if no improvement has been shown
                 print(f"Early stopping on epoch {epoch}. Best val loss: {best_val_loss:.6f}")
                 break
 
-    # load best state
+    # load best state (best model)
     if best_state is not None:
         model.load_state_dict(best_state)
 
     return model, train_losses, val_losses
+
+
+# ---------------------------
+# Evaluation
+# ---------------------------
 
 def evaluate_model(model: nn.Module, device: torch.device, loader: DataLoader):
     model.eval()

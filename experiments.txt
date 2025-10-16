@@ -14,45 +14,45 @@ METRICS EXPLANATION:
 EXPERIMENT RANKING:
 ===================
 
-1. BEST PERFORMING
-   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.01 --hidden_layers 128 64 --dropout 0.0
-   RMSE: 29769, MAE: 19174, Actual Epochs: 68
-
-2. SECOND BEST
-   Command: python regresion_nn.py --epochs 500 --pca_components 35 --lr 0.001 --hidden_layers 256 128 64 --dropout 0.0
-   RMSE: 29769, MAE: 19174, Actual Epochs: 128
-
-3. THIRD BEST
-   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.005 --hidden_layers 128 64 --dropout 0.0
-   RMSE: 31037, MAE: 19182, Actual Epochs: 95
-
-4. FOURTH
-   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.001 --hidden_layers 128 64 --dropout 0.0
-   RMSE: 31154, MAE: 19163, Actual Epochs: 356
-
-5. FIFTH
-   Command: python regresion_nn.py --epochs 500 --pca_components 35 --lr 0.001 --hidden_layers 256 128 64 --dropout 0.2
-   RMSE: 30374, MAE: 19838, Actual Epochs: 94
-
-6. SIXTH
-   Command: python regresion_nn.py --epochs 500 --pca_components 35 --lr 0.001 --hidden_layers 256 128 64 --dropout 0.1
-   RMSE: 30428, MAE: 19887, Actual Epochs: 114
-
-7. SEVENTH
-   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.01 --hidden_layers 128 64 --dropout 0.2
-   RMSE: 31227, MAE: 19419, Actual Epochs: 58
-
-8. EIGHTH
-   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.01 --hidden_layers 256 128 64 --dropout 0.15
-   RMSE: 30972, MAE: 19827, Actual Epochs: 24
-
-9. NINTH
+1. **FIRST**
    Command: python regresion_nn.py --epochs 500 --pca_components 30 --lr 0.01 --hidden_layers 256 128 64 --dropout 0.0
-   RMSE: 30802, MAE: 19748, Actual Epochs: 29
+   RMSE: 30140, MAE: 18765, R²: 0.8818, Actual Epochs: 29
 
-10. TENTH
-    Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.01 --hidden_layers 256 128 64 --dropout 0.1
-    RMSE: 31061, MAE: 20028, Actual Epochs: 24
+2. **SECOND**
+   Command: python regresion_nn.py --epochs 500 --pca_components 25 --lr 0.01 --hidden_layers 128 64 --dropout 0.1
+   RMSE: 30516, MAE: 18725, R²: 0.8788, Actual Epochs: 60
+
+3. **THIRD**
+   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.01 --hidden_layers 128 64 --dropout 0.0
+   RMSE: 30990, MAE: 18822, R²: 0.8750, Actual Epochs: 91
+
+4. **FOURTH**
+   Command: python regresion_nn.py --epochs 500 --pca_components 35 --lr 0.001 --hidden_layers 256 128 64 --dropout 0.1
+   RMSE: 30912, MAE: 19094, R²: 0.8756, Actual Epochs: 59
+
+5. **FIFTH**
+   Command: python regresion_nn.py --epochs 500 --pca_components 35 --lr 0.001 --hidden_layers 256 128 64 --dropout 0.2
+   RMSE: 31012, MAE: 18931, R²: 0.8748, Actual Epochs: 94
+
+6. **SIXTH**
+   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.01 --hidden_layers 256 128 64 --dropout 0.15
+   RMSE: 31577, MAE: 20170, R²: 0.8702, Actual Epochs: 33
+
+7. **SEVENTH**
+   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.005 --hidden_layers 128 64 --dropout 0.0
+   RMSE: 31709, MAE: 19687, R²: 0.8691, Actual Epochs: 95
+
+8. **EIGHTH**
+   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.01 --hidden_layers 128 64 --dropout 0.2
+   RMSE: 31675, MAE: 20065, R²: 0.8694, Actual Epochs: 58
+
+9. **NINTH**
+   Command: python regresion_nn.py --epochs 500 --pca_components 20 --lr 0.01 --hidden_layers 256 128 64 --dropout 0.1
+   RMSE: 31737, MAE: 19508, R²: 0.8689, Actual Epochs: 28
+
+10. **TENTH**
+    Command: python regresion_nn.py --epochs 500 --pca_components 35 --lr 0.001 --hidden_layers 256 128 64 --dropout 0.0
+    RMSE: 31823, MAE: 19830, R²: 0.8682, Actual Epochs: 37
 
 ADDITIONAL EXPERIMENTS:
 =======================
@@ -77,35 +77,47 @@ ADDITIONAL EXPERIMENTS:
 
 KEY FINDINGS:
 =============
+OPTIMAL CONFIGURATION:
+PCA: 30 components
+Learning Rate: 0.01
+Architecture: [256, 128, 64]
+Dropout: 0.0 (none)
+Training: 29 epochs (early stopping)
 
-1. OPTIMAL CONFIGURATION:
-   - PCA: 20 components
-   - Learning Rate: 0.01
-   - Architecture: [128, 64]
-   - Dropout: 0.0 (none)
-   - Training: 68 epochs (early stopping)
+PCA ANALYSIS:
+Best: PCA 30 (R²: 0.8818)
+Very Good: PCA 25 (R²: 0.8788)
+Acceptable: PCA 20, 35 (R²: 0.8750-0.8756)
+Poor: PCA <20 or >35
 
-2. PCA ANALYSIS:
-   - Best: PCA 20
-   - Acceptable: PCA 30-35
-   - Poor: PCA 0, 15, 25
+LEARNING RATE ANALYSIS:
+Best: 0.01 (all top 3 configurations)
+Acceptable: 0.005, 0.001
+0.01 consistently outperforms lower learning rates
 
-3. LEARNING RATE ANALYSIS:
-   - Best: 0.01
-   - Acceptable: 0.005, 0.001
-   - Poor: 0.0001
+ARCHITECTURE ANALYSIS:
+Best: [256, 128, 64] with PCA 30
+Very Good: [128, 64] with PCA 25
+Complex architectures benefit from higher PCA components
+Simpler architectures more stable across different PCA values
 
-4. ARCHITECTURE ANALYSIS:
-   - Best: [128, 64]
-   - Complex architectures ([256, 128, 64]) require more PCA components
+DROPOUT ANALYSIS:
+Dropout consistently provided no benefit or worsened performance
+Top 3 configurations all use Dropout 0.0
+Model shows no signs of overfitting with optimal parameters
+Regularization unnecessary for this dataset/config
 
-5. DROPOUT ANALYSIS:
-   - Dropout consistently worsened performance
-   - Model does not overfit with optimal parameters
-   - Dropout unnecessary for this dataset/config
+TRAINING EFFICIENCY:
+Best model trains in only 29 epochs
+Typical training range: 29-95 epochs
+Lower learning rates (0.001) require more training time
+Optimal configurations converge quickly
 
 PERFORMANCE RANGES:
 ===================
-- Best RMSE: 29,769
-- Worst RMSE: 61,813
-- Typical RMSE: 30,000 - 33,000
+Best RMSE: 30,140 (R²: 0.8818)
+Worst RMSE: 33,413 (R²: 0.8547)
+Typical RMSE: 30,000 - 32,000
+Best R²: 0.8818
+Worst R²: 0.8547
+Typical R²: 0.868 - 0.882
