@@ -16,6 +16,7 @@ from data.preprocessing import (
     build_preprocessors,
     transform_dataframe
 )
+from models.neural_net import RegressionNet
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
@@ -35,31 +36,6 @@ torch.manual_seed(SEED)
 
 def set_device():
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-# ---------------------------
-# Model
-# ---------------------------
-
-class RegressionNet(nn.Module):
-    """
-    Fully connected neural network for regression.
-    Takes input features and outputs a continuous value through hidden layers.
-    """
-    def __init__(self, input_dim: int, hidden_layers: List[int], dropout: float = 0.0):
-        super().__init__()
-        layers = []
-        last_dim = input_dim
-        for i, h in enumerate(hidden_layers):
-            layers.append(nn.Linear(last_dim, h))
-            layers.append(nn.ReLU())
-            if dropout > 0:
-                layers.append(nn.Dropout(dropout))
-            last_dim = h
-        layers.append(nn.Linear(last_dim, 1))  # output
-        self.net = nn.Sequential(*layers)
-
-    def forward(self, x):
-        return self.net(x)
 
 # ---------------------------
 # Training
