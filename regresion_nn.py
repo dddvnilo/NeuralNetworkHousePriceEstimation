@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from config.args import parse_args
 from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
@@ -303,29 +304,6 @@ def evaluate_model(model: nn.Module, device: torch.device, loader: DataLoader):
 # ---------------------------
 # Main pipeline
 # ---------------------------
-
-def parse_args():
-    p = argparse.ArgumentParser()
-    p.add_argument("--data_path", type=str, default="dataset/AmesHousing.csv", help="Path to Ames CSV file")
-    p.add_argument("--target", type=str, default="SalePrice")
-    p.add_argument("--drop_missing_thresh", type=float, default=0.30,
-                   help="Drop columns with more than this fraction missing")
-    p.add_argument("--correlation_thresh", type=float, default=0.05,
-                   help="Remove features with absolute correlation below this threshold")
-    p.add_argument("--pca_components", type=int, default=0,
-                   help="If >0, apply PCA to reduce features to this many components")
-    p.add_argument("--hidden_layers", type=int, nargs="+", default=[128, 64],
-                   help="Hidden layer sizes")
-    p.add_argument("--dropout", type=float, default=0.0, help="Dropout rate")
-    p.add_argument("--epochs", type=int, default=100)
-    p.add_argument("--batch_size", type=int, default=64)
-    p.add_argument("--lr", type=float, default=1e-3)
-    p.add_argument("--patience", type=int, default=12)
-    p.add_argument("--test_size", type=float, default=0.15)
-    p.add_argument("--val_size", type=float, default=0.15)
-    p.add_argument("--output_dir", type=str, default="output")
-    p.add_argument("--random_state", type=int, default=SEED)
-    return p.parse_args()
 
 def main():
     args = parse_args()
