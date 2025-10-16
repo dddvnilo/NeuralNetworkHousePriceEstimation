@@ -1,7 +1,5 @@
-import argparse
 import os
 import random
-from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -17,16 +15,18 @@ from data.preprocessing import (
     transform_dataframe
 )
 from models.neural_net import RegressionNet
+from training.training import (
+    train_model,
+    evaluate_model
+)
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 import torch
-from torch import nn
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 
 # ---------------------------
-# Utilities & Dataset class
+# SEED
 # ---------------------------
 
 SEED = 42
@@ -36,138 +36,6 @@ torch.manual_seed(SEED)
 
 def set_device():
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-# ---------------------------
-# Training
-# ---------------------------
-
-def train_model(
-    model: nn.Module,
-    device: torch.device,
-    train_loader: DataLoader,
-    val_loader: DataLoader,
-    epochs: int = 100,
-    lr: float = 1e-3,
-    weight_decay: float = 0.0,
-    patience: int = 10,
-    print_every: int = 1
-):
-    """
-    Train the neural network model with early stopping.
-    
-    Args:
-        model: Neural network model to train
-        device: Device to train on (CPU/GPU)
-        train_loader: DataLoader for training data
-        val_loader: DataLoader for validation data  
-        epochs: Maximum number of training epochs
-        lr: Learning rate for optimizer
-        weight_decay: L2 regularization strength
-        patience: Early stopping patience (epochs without improvement)
-        print_every: Print metrics every N epochs
-        
-    Returns:
-        model: Trained model with best weights restored
-        train_losses: List of training losses per epoch
-        val_losses: List of validation losses per epoch
-    """
-
-    criterion = nn.MSELoss()
-    # NOTE: Alternative - HuberLoss is more robust to outliers but MSE was specified in requirements
-    # criterion = nn.HuberLoss(delta=1.0)
-
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
-    model.to(device)
-
-    best_val_loss = float("inf")
-    best_state = None
-    epochs_no_improve = 0 # early stopping counter
-
-    train_losses = []
-    val_losses = []
-
-    for epoch in range(1, epochs + 1):
-        model.train()                                   # training mode
-        running_loss = 0.0
-        n = 0
-        for Xb, yb in train_loader:
-            Xb = Xb.to(device)
-            yb = yb.to(device)
-            optimizer.zero_grad()
-            preds = model(Xb)                           # forward pass
-            loss = criterion(preds, yb)                 # calculate loss
-            loss.backward()                             # backward pass
-            optimizer.step()                            # update weigths
-            running_loss += loss.item() * Xb.size(0)
-            n += Xb.size(0)
-        train_epoch_loss = running_loss / n             # average loss for an epoch
-        train_losses.append(train_epoch_loss)
-
-        # Validation
-        model.eval()                                    # evaluation mode
-        running_val = 0.0
-        nval = 0
-        with torch.no_grad():
-            for Xv, yv in val_loader:
-                Xv = Xv.to(device)
-                yv = yv.to(device)
-                preds_v = model(Xv)                     # only forward
-                loss_v = criterion(preds_v, yv)         # calculate loss for validation set
-                running_val += loss_v.item() * Xv.size(0)
-                nval += Xv.size(0)
-        val_epoch_loss = running_val / nval
-        val_losses.append(val_epoch_loss)
-
-        if epoch % print_every == 0:
-            print(f"Epoch {epoch:03d}: train_loss={train_epoch_loss:.4f}, val_loss={val_epoch_loss:.4f}")
-
-        # early stopping
-        if val_epoch_loss < best_val_loss - 1e-6:
-            best_val_loss = val_epoch_loss
-            best_state = model.state_dict()             # save best weights
-            epochs_no_improve = 0
-        else:
-            epochs_no_improve += 1
-            if epochs_no_improve >= patience:           # stop if no improvement has been shown
-                print(f"Early stopping on epoch {epoch}. Best val loss: {best_val_loss:.6f}")
-                break
-
-    # load best state (best model)
-    if best_state is not None:
-        model.load_state_dict(best_state)
-
-    return model, train_losses, val_losses
-
-
-# ---------------------------
-# Evaluation
-# ---------------------------
-
-def evaluate_model(model: nn.Module, device: torch.device, loader: DataLoader):
-    model.eval()
-    preds = []
-    trues = []
-    with torch.no_grad():
-        for Xb, yb in loader:
-            Xb = Xb.to(device)
-            out = model(Xb).cpu().numpy().reshape(-1)
-            preds.append(out)
-            trues.append(yb.numpy().reshape(-1))
-    preds = np.concatenate(preds, axis=0)
-    trues = np.concatenate(trues, axis=0)
-
-    mse = mean_squared_error(trues, preds)
-    rmse = np.sqrt(mse)
-    mae = mean_absolute_error(trues, preds)
-    r2 = r2_score(trues, preds)
-    return {
-        "mse": mse, 
-        "rmse": rmse, 
-        "mae": mae, 
-        "r2": r2,
-        "preds": preds, 
-        "trues": trues
-    }
 
 # ---------------------------
 # Main pipeline
