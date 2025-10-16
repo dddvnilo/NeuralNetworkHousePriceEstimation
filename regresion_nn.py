@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OrdinalEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
 from sklearn.decomposition import PCA
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 import torch
 from torch import nn
@@ -69,6 +69,9 @@ def remove_low_correlation_features(df: pd.DataFrame, target_col: str, threshold
     return df.drop(columns=low_corr_cols)
 
 def split_features_target(df: pd.DataFrame, target_col: str = "SalePrice") -> Tuple[pd.DataFrame, pd.Series]:
+    """
+    Split target feature from other features.
+    """
     if target_col not in df.columns:
         raise ValueError(f"Target column '{target_col}' not found in dataframe.")
     y = df[target_col].values
@@ -95,8 +98,8 @@ def build_preprocessors(
     X_train_cat = X_train[categorical_cols].fillna(cat_fill_value)
 
     # OrdinalEncoder with handle_unknown via setting unknown_value
-    ord_enc = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
-    ord_enc.fit(X_train_cat)
+    onehot_enc = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
+    onehot_enc.fit(X_train_cat)
 
     scaler = StandardScaler()
     # We'll fit scaler on numeric features after imputation
@@ -107,7 +110,7 @@ def build_preprocessors(
         "numeric_cols": numeric_cols,
         "categorical_cols": categorical_cols,
         "num_imputer": num_imputer,
-        "ord_encoder": ord_enc,
+        "onehot_encoder": onehot_enc,
         "cat_fill_value": cat_fill_value,
         "scaler": scaler
     }
@@ -119,7 +122,7 @@ def transform_dataframe(df: pd.DataFrame, preprocessors: dict) -> np.ndarray:
     ncols = preprocessors["numeric_cols"]
     ccols = preprocessors["categorical_cols"]
     num_imputer = preprocessors["num_imputer"]
-    ord_enc = preprocessors["ord_encoder"]
+    onehot_enc = preprocessors["onehot_encoder"]
     cat_fill_value = preprocessors["cat_fill_value"]
     scaler = preprocessors["scaler"]
 
@@ -133,8 +136,8 @@ def transform_dataframe(df: pd.DataFrame, preprocessors: dict) -> np.ndarray:
     # Categorical
     if len(ccols) > 0:
         X_cat = df[ccols].fillna(cat_fill_value)
-        X_cat_enc = ord_enc.transform(X_cat)
-        X_total = np.hstack([X_num_scaled, X_cat_enc])
+        X_cat_encoded = onehot_enc.transform(X_cat)
+        X_total = np.hstack([X_num_scaled, X_cat_encoded])
     else:
         X_total = X_num_scaled
 
@@ -255,7 +258,15 @@ def evaluate_model(model: nn.Module, device: torch.device, loader: DataLoader):
     mse = mean_squared_error(trues, preds)
     rmse = np.sqrt(mse)
     mae = mean_absolute_error(trues, preds)
-    return {"mse": mse, "rmse": rmse, "mae": mae, "preds": preds, "trues": trues}
+    r2 = r2_score(trues, preds)
+    return {
+        "mse": mse, 
+        "rmse": rmse, 
+        "mae": mae, 
+        "r2": r2,
+        "preds": preds, 
+        "trues": trues
+    }
 
 # ---------------------------
 # Main pipeline
@@ -380,6 +391,7 @@ def main():
     print(f"  MSE:  {test_metrics['mse']:.4f}")
     print(f"  RMSE: {test_metrics['rmse']:.4f}")
     print(f"  MAE:  {test_metrics['mae']:.4f}")
+    print(f"  R²:   {test_metrics['r2']:.4f}") 
 
     # 13) Save model
     model_path = os.path.join(args.output_dir, "model.pt")
