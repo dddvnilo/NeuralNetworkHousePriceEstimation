@@ -12,7 +12,7 @@ def train_model(
     lr: float = 1e-3,
     weight_decay: float = 0.0,
     patience: int = 10,
-    print_every: int = 1
+    print_every: int = 25
 ):
     """
     Train the neural network model with early stopping.

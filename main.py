@@ -1,6 +1,7 @@
 import os
 import random
 
+import json
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -137,7 +138,19 @@ def main():
     print(f"  MSE:  {test_metrics['mse']:.4f}")
     print(f"  RMSE: {test_metrics['rmse']:.4f}")
     print(f"  MAE:  {test_metrics['mae']:.4f}")
-    print(f"  R²:   {test_metrics['r2']:.4f}") 
+    print(f"  R²:   {test_metrics['r2']:.4f}")
+
+    basic_metrics = {
+        'mse': float(test_metrics['mse']),
+        'rmse': float(test_metrics['rmse']), 
+        'mae': float(test_metrics['mae']),
+        'r2': float(test_metrics['r2'])
+    }
+    
+    metrics_file = os.path.join(args.output_dir, "metrics.json")
+    with open(metrics_file, 'w') as f:
+        json.dump(basic_metrics, f, indent=2)
+    print(f"Saved metrics to {metrics_file}")
 
     # 13) Save model
     model_path = os.path.join(args.output_dir, "model.pt")
