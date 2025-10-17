@@ -2,6 +2,9 @@ import torch
 from torch.utils.data import Dataset
 import numpy as np
 
+# Custom PyTorch Dataset for tabular data.
+# Stores features X and targets y as float32 and provides
+# standard __len__ and __getitem__ methods for DataLoader.
 class TabularDataset(Dataset):
     def __init__(self, X: np.ndarray, y: np.ndarray):
         self.X = X.astype(np.float32)

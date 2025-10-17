@@ -48,27 +48,27 @@ def train_model(
     val_losses = []
 
     for epoch in range(1, epochs + 1):
-        model.train()
+        model.train() # train mode - dropout activation
         running_loss = 0.0
         n = 0
-        for Xb, yb in train_loader:
+        for Xb, yb in train_loader: # batches
             Xb = Xb.to(device)
             yb = yb.to(device)
-            optimizer.zero_grad()
-            preds = model(Xb)
-            loss = criterion(preds, yb)
-            loss.backward()
-            optimizer.step()
-            running_loss += loss.item() * Xb.size(0)
+            optimizer.zero_grad() # reset gradients
+            preds = model(Xb) # forward pass
+            loss = criterion(preds, yb) # calculate loss
+            loss.backward() # backpropagation
+            optimizer.step() # update weights
+            running_loss += loss.item() * Xb.size(0) # average loss for batch
             n += Xb.size(0)
         train_epoch_loss = running_loss / n
         train_losses.append(train_epoch_loss)
 
-        model.eval()
+        model.eval() # evaluation mode
         running_val = 0.0
         nval = 0
         with torch.no_grad():
-            for Xv, yv in val_loader:
+            for Xv, yv in val_loader: # same thing for validation set
                 Xv = Xv.to(device)
                 yv = yv.to(device)
                 preds_v = model(Xv)
@@ -81,7 +81,7 @@ def train_model(
         if epoch % print_every == 0:
             print(f"Epoch {epoch:03d}: train_loss={train_epoch_loss:.4f}, val_loss={val_epoch_loss:.4f}")
 
-        if val_epoch_loss < best_val_loss - 1e-6:
+        if val_epoch_loss < best_val_loss - 1e-6: # early stop and best state
             best_val_loss = val_epoch_loss
             best_state = model.state_dict()
             epochs_no_improve = 0
