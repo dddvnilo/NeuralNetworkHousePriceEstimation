@@ -1,5 +1,7 @@
+from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
+import os
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.decomposition import PCA
@@ -14,7 +16,7 @@ def drop_high_missing(df: pd.DataFrame, threshold: float = 0.3) -> pd.DataFrame:
     print(f"Dropping {len(to_drop)} columns with >{threshold*100:.0f}% missing values.")
     return df.drop(columns=to_drop)
 
-def remove_low_correlation_features(df: pd.DataFrame, target_col: str, threshold: float = 0.05) -> pd.DataFrame:
+def remove_low_correlation_features(df: pd.DataFrame, target_col: str, threshold: float = 0.05, output_dir: str = "output") -> pd.DataFrame:
     """
     Remove features with absolute correlation with target below threshold.
     """
@@ -27,6 +29,35 @@ def remove_low_correlation_features(df: pd.DataFrame, target_col: str, threshold
     low_corr_cols = [col for col in low_corr_cols if col != target_col]
     
     print(f"Removing {len(low_corr_cols)} features with correlation < {threshold}")
+
+    # Display correlations before and after
+    plt.figure(figsize=(12, 6))
+    
+    # All correlations
+    all_correlations = correlations[correlations.index != target_col]
+    
+    # Split into high and low correlations
+    high_corr = all_correlations[all_correlations >= threshold]
+    low_corr = all_correlations[all_correlations < threshold]
+    
+    # Graphical display
+    plt.subplot(1, 2, 1)
+    plt.barh(range(len(high_corr)), high_corr.sort_values().values)
+    plt.yticks(range(len(high_corr)), high_corr.sort_values().index)
+    plt.title(f'Retained Features (correlation ≥ {threshold})')
+    plt.xlabel('Absolute Correlation')
+    
+    plt.subplot(1, 2, 2)
+    plt.barh(range(len(low_corr)), low_corr.sort_values().values)
+    plt.yticks(range(len(low_corr)), low_corr.sort_values().index)
+    plt.title(f'Removed Features (correlation < {threshold})')
+    plt.xlabel('Absolute Correlation')
+    
+    plt.tight_layout()
+    os.makedirs(output_dir, exist_ok=True)
+    plt.savefig(os.path.join(output_dir, 'correlation_analysis.png'), dpi=300, bbox_inches='tight')
+    plt.close()
+    
     return df.drop(columns=low_corr_cols)
 
 def split_features_target(df: pd.DataFrame, target_col: str = "SalePrice") -> Tuple[pd.DataFrame, pd.Series]:

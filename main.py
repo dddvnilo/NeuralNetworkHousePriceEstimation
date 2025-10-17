@@ -58,7 +58,8 @@ def main():
 
     if args.correlation_thresh > 0:
         df = remove_low_correlation_features(df, target_col=args.target, 
-                                           threshold=args.correlation_thresh)
+                                           threshold=args.correlation_thresh,
+                                           output_dir=args.output_dir)
         print("After removing low-correlation features:", df.shape)
 
     # 4) split X/y and then train/val/test (we must split BEFORE fitting preprocessors)
@@ -152,17 +153,7 @@ def main():
         json.dump(basic_metrics, f, indent=2)
     print(f"Saved metrics to {metrics_file}")
 
-    # 13) Save model
-    model_path = os.path.join(args.output_dir, "model.pt")
-    torch.save({
-        "model_state_dict": model.state_dict(),
-        "input_dim": input_dim,
-        "hidden_layers": args.hidden_layers,
-        "preprocessors": preprocessors
-    }, model_path)
-    print("Saved model to", model_path)
-
-    # 14) Save predictions CSV for test set
+    # 13) Save predictions CSV for test set
     preds = test_metrics["preds"]
     trues = test_metrics["trues"]
     out_df = pd.DataFrame({"true": trues, "pred": preds})
@@ -170,7 +161,7 @@ def main():
     out_df.to_csv(out_csv, index=False)
     print("Saved test predictions to", out_csv)
 
-    # 15) scatter plot (true vs pred)
+    # 14) scatter plot (true vs pred)
     plt.figure(figsize=(6,6))
     plt.scatter(trues, preds, alpha=0.6)
     minv = min(trues.min(), preds.min())
