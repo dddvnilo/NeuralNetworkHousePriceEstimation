@@ -59,6 +59,7 @@ def main():
     df = drop_high_missing(df, threshold=args.drop_missing_thresh)
     print("After dropping columns:", df.shape)
 
+    # 3) Drop columns with correlation less then given
     if args.correlation_thresh > 0:
         df = remove_low_correlation_features(df, target_col=args.target, 
                                            threshold=args.correlation_thresh,
