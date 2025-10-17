@@ -2,6 +2,8 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
 import os
+import seaborn as sns
+import torch
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.decomposition import PCA
@@ -134,3 +136,71 @@ def transform_dataframe(df: pd.DataFrame, preprocessors: dict) -> np.ndarray:
         X_total = X_num_scaled
 
     return X_total
+
+def plot_pca_feature_contributions(pca: PCA, feature_names: list, output_dir: str, top_n: int = 10):
+    """
+    Plot feature contributions (loadings) for each PCA component.
+    
+    Args:
+        pca: fitted PCA object
+        feature_names: list of original feature names
+        output_dir: directory to save plots
+        top_n: number of top contributing features to plot per component
+    """
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    loadings = pd.DataFrame(
+        pca.components_.T,
+        columns=[f'PC{i+1}' for i in range(pca.n_components_)],
+        index=feature_names
+    )
+
+    plt.figure(figsize=(12, 8))
+    sns.heatmap(loadings, cmap='coolwarm', center=0)
+    plt.title('PCA Feature Contributions (Loadings)')
+    plt.xlabel('Principal Components')
+    plt.ylabel('Features')
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, 'pca_loadings_heatmap.png'), dpi=300)
+    plt.close()
+
+    print(f"PCA contribution plots saved to {output_dir}")
+
+
+def plot_component_importance(model: torch.nn.Module, output_dir: str):
+    """
+    Plot importance of PCA components according to the first layer weights of the network.
+    
+    Args:
+        model: Trained PyTorch model
+        output_dir: Directory where plot will be saved
+    """
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    first_linear_layer = None
+    for module in model.modules():
+        if isinstance(module, torch.nn.Linear):
+            first_linear_layer = module
+            break
+
+    if first_linear_layer is None:
+        raise ValueError("Model has no Linear layer to extract component weights from.")
+
+    with torch.no_grad():
+        # weights shape: (out_features, in_features)
+        first_layer_weights = first_linear_layer.weight.cpu().numpy()
+    
+    component_importance = np.mean(np.abs(first_layer_weights), axis=0)
+
+    plt.figure(figsize=(8, 4))
+    plt.bar(range(1, len(component_importance) + 1), component_importance)
+    plt.xlabel("PCA Component")
+    plt.ylabel("Mean |Weight| (First Layer)")
+    plt.title("Component Importance by Neural Network")
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, "pca_component_importance.png"), dpi=300)
+    plt.close()
+
+    print(f"Saved component importance plot to {os.path.join(output_dir, 'pca_component_importance.png')}")

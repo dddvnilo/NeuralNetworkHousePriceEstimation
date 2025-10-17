@@ -13,12 +13,15 @@ from data.preprocessing import (
     remove_low_correlation_features,
     split_features_target,
     build_preprocessors,
-    transform_dataframe
+    transform_dataframe,
+    plot_pca_feature_contributions,
+    plot_component_importance
 )
 from models.neural_net import RegressionNet
 from training.training import (
     train_model,
-    evaluate_model
+    evaluate_model,
+    plot_error_distribution
 )
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
@@ -100,6 +103,9 @@ def main():
     else:
         print(f"No PCA. Feature dim: {X_train_np.shape[1]}")
 
+    all_feature_names = preprocessors["numeric_cols"] + list(preprocessors["onehot_encoder"].get_feature_names_out(preprocessors["categorical_cols"]))
+    plot_pca_feature_contributions(pca, all_feature_names, args.output_dir, top_n=10)
+
     # 8) Build dataloaders
     train_ds = TabularDataset(X_train_np, y_train)
     val_ds = TabularDataset(X_val_np, y_val)
@@ -175,6 +181,13 @@ def main():
     plt.savefig(scatter_path)
     print("Saved scatter to", scatter_path)
     plt.close()
+
+    # 15) component importance plot
+    plot_component_importance(model, args.output_dir)
+
+    # 16) error distribution + residuals
+    plot_error_distribution(out_df, args.output_dir)
+    print("Saved error analysis plot to", os.path.join(args.output_dir, "error_analysis.png"))
 
     print("All done. Outputs in:", args.output_dir)
 

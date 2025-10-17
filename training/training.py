@@ -1,5 +1,7 @@
 import torch
 import numpy as np
+import matplotlib.pyplot as plt
+import os
 from torch.utils.data import DataLoader
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
@@ -119,3 +121,26 @@ def evaluate_model(model: torch.nn.Module, device: torch.device, loader: torch.u
         "preds": preds, 
         "trues": trues
     }
+
+def plot_error_distribution(predictions_df, output_dir: str):
+    errors = predictions_df['pred'] - predictions_df['true']
+    
+    plt.figure(figsize=(12, 5))
+    
+    plt.subplot(1, 2, 1)
+    plt.hist(errors, bins=50, alpha=0.7, color='red')
+    plt.axvline(x=0, color='black', linestyle='--')
+    plt.title('Distribution of Prediction Errors')
+    plt.xlabel('Error (Predicted - True)')
+    plt.ylabel('Frequency')
+    
+    plt.subplot(1, 2, 2)
+    plt.scatter(predictions_df['true'], errors, alpha=0.6)
+    plt.axhline(y=0, color='black', linestyle='--')
+    plt.title('Residual Plot')
+    plt.xlabel('True Price')
+    plt.ylabel('Error')
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, 'error_analysis.png'), dpi=300)
+    plt.close()
